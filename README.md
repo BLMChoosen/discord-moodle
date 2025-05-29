@@ -29,7 +29,7 @@ pip install -r requirements.txt
 
 4. Rode o script:
 ```
-python bot_moodle.py
+python main.py
 ```
 ## Avisos importantes
 
