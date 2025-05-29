@@ -20,17 +20,17 @@ Esse é um bot do Discord que faz login automático no Moodle da sua escola, pux
 ## Como usar
 
 1. Instale as dependências:
-
+```
 pip install -r requirements.txt
-
-2. Configure o script com seu usuário, senha e URL do Moodle, além do ID do curso que você quer monitorar.
+```
+2. Configure o .env com seu usuário, senha e URL do Moodle, além do ID do curso que você quer monitorar.
 
 3. Configure o token do bot do Discord e o canal onde ele deve mandar as mensagens.
 
 4. Rode o script:
-
+```
 python bot_moodle.py
-
+```
 ## Avisos importantes
 
 - Login automático pode ser bloqueado pelo Moodle ou pela escola.
