@@ -100,3 +100,15 @@ Pronto! Agora cole esse ID no arquivo de configuração (como o `.env` ou outro 
 
 Se tiver dúvidas, dá uma olhada na [documentação oficial do Discord](https://support.discord.com/hc/pt-br/articles/206346498) para mais detalhes.
 
+
+
+## To-do:
+
+- Implementar verificação mais precisa, apenas de tarefas (assign).
+
+- Adicionar suporte para acompanhamento individual, marcando tarefas como concluídas e com horários de notificação personalizados.
+
+- Adicionar uma instalação mais simples e com menos funcionalidades, com webhooks.
+
+- Estruturar e criar comandos para facilitar o gerenciamento.
+
