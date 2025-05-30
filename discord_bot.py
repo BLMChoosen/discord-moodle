@@ -3,6 +3,7 @@ from discord.ext import tasks
 import asyncio
 from datetime import datetime, timedelta
 import utils
+from utils import now_brasilia
 
 class DiscordBot(discord.Client):
     def __init__(self, moodle_client, channel_id, message_ai, *args, **kwargs):
@@ -52,7 +53,7 @@ class DiscordBot(discord.Client):
 
         print('[DiscordBot] Enviando atividades pendentes (primeira execução)...')
         courses = self.moodle_client.get_courses()
-        now = datetime.now()
+        now = now_brasilia()
         for course in courses:
             assignments = self.moodle_client.get_assignments(course['id'])
             msg_lines = []
@@ -82,7 +83,7 @@ class DiscordBot(discord.Client):
                 return
 
             print('\n=== Verificando novas atividades e lembretes ===')
-            now = datetime.now()
+            now = now_brasilia()
             today = now.date()
             for course in courses:
                 assignments = self.moodle_client.get_assignments(course['id'])
