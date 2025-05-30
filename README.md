@@ -2,7 +2,7 @@
 
 ## O que é isso?
 
-Esse é um bot do Discord que faz login automático no Moodle da sua escola, puxa as atividades e seus prazos e avisa a galera no servidor quando os prazos estiverem chegando. Tudo no modo automático, sem você precisar ficar entrando no Moodle toda hora.
+Esse é um bot do Discord que faz login automático no Moodle do IFRS Campus Farroupilha com seu usuário, puxa as atividades e seus prazos e avisa a galera no servidor quando os prazos estiverem chegando. Tudo no modo automático, sem você precisar ficar entrando no Moodle toda hora.
 
 ## Como funciona?
 
