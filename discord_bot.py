@@ -126,5 +126,13 @@ class DiscordBot(discord.Client):
                             )
                             await channel.send(msg)
             print('[DiscordBot] Verificação de tarefas concluída.')
+
+            # Mostra o horário da próxima execução (após o término do loop)
+            next_run = self.check_assignments.next_iteration
+            if next_run is not None:
+                import pytz
+                br_tz = pytz.timezone('America/Sao_Paulo')
+                next_run_br = next_run.astimezone(br_tz)
+                print(f'[DiscordBot] Próxima verificação em {next_run_br.strftime("%d/%m/%Y %H:%M:%S")} (horário de Brasília)')
         except Exception as e:
             print(f'[DiscordBot] Erro ao checar prazos: {e}')
