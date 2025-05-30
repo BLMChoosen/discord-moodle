@@ -68,7 +68,6 @@ class MoodleClient:
         return courses
 
     def get_assignments(self, course_id):
-        print(f'[MoodleClient] Buscando tarefas para o curso {course_id}...')
         assign_url = f"{self.base_url}/mod/assign/index.php?id={course_id}"
         resp = self.session.get(assign_url)
         soup = BeautifulSoup(resp.text, 'html.parser')
@@ -81,7 +80,6 @@ class MoodleClient:
                 name = cols[0].get_text(strip=True)
                 due = cols[2].get_text(strip=True)
                 assignments.append({'name': name, 'due': due})
-        print(f'[MoodleClient] {len(assignments)} tarefas encontradas para o curso {course_id}.')
         return assignments
 
     def print_all_courses_and_assignments(self):
