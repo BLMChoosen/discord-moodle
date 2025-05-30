@@ -52,15 +52,15 @@ class DiscordBot(discord.Client):
 
         print('[DiscordBot] Enviando atividades pendentes (primeira execução)...')
         courses = self.moodle_client.get_courses()
-        today = datetime.now().date()
+        now = datetime.now()
         for course in courses:
             assignments = self.moodle_client.get_assignments(course['id'])
             msg_lines = []
             for a in assignments:
                 due_dt = utils.parse_moodle_date(a['due'])
-                if due_dt and due_dt.date() >= today:
+                # Só mostra se o prazo ainda não passou (>= agora)
+                if due_dt and due_dt >= now:
                     msg_lines.append(f'**{a["name"]}**\nVencimento: `{a["due"]}`')
-                    # Só marca como checada se o prazo não venceu
                     self.checked_assignments.add((course['id'], a['name'], a['due']))
             if msg_lines:
                 msg = f'**Curso:** {course["name"]}\n' + '\n\n'.join(msg_lines)
@@ -88,8 +88,9 @@ class DiscordBot(discord.Client):
                 assignments = self.moodle_client.get_assignments(course['id'])
                 for a in assignments:
                     due_dt = utils.parse_moodle_date(a['due'])
-                    if not due_dt or due_dt.date() < today:
-                        continue  # Ignore vencidas
+                    # Só ignora se o prazo já passou
+                    if not due_dt or due_dt < now:
+                        continue
                     key = (course['id'], a['name'], a['due'])
                     # Nova atividade (após primeira execução)
                     if key not in self.checked_assignments:

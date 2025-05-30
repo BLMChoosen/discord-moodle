@@ -25,7 +25,8 @@ def parse_moodle_date(date_str):
             if not mes:
                 return None
             dt = datetime(int(ano), int(mes), int(dia), int(hora), int(minuto))
-            if dt.date() < datetime.now().date():
+            # Só retorna None se o prazo já passou (data e hora)
+            if dt < datetime.now():
                 return None
             return dt
         # Ex: '29 mai. 2025'
@@ -36,6 +37,7 @@ def parse_moodle_date(date_str):
             if not mes:
                 return None
             dt = datetime(int(ano), int(mes), int(dia))
+            # Considera vencido só se a data já passou (hoje ainda vale)
             if dt.date() < datetime.now().date():
                 return None
             return dt
@@ -43,8 +45,12 @@ def parse_moodle_date(date_str):
         for fmt in ("%d/%m/%Y %H:%M", "%d/%m/%Y", "%Y-%m-%d %H:%M", "%Y-%m-%d"):
             try:
                 dt = datetime.strptime(date_str, fmt)
-                if dt.date() < datetime.now().date():
-                    return None
+                if fmt.endswith("%H:%M"):
+                    if dt < datetime.now():
+                        return None
+                else:
+                    if dt.date() < datetime.now().date():
+                        return None
                 return dt
             except Exception:
                 continue
