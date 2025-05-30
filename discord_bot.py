@@ -82,8 +82,8 @@ class DiscordBot(discord.Client):
                 print(f'[DiscordBot] Canal {self.channel_id} não encontrado.')
                 return
 
-            print('\n=== Verificando novas atividades e lembretes ===')
             now = now_brasilia()
+            print(f'\n[DiscordBot] Verificando novas atividades e lembretes em {now.strftime("%d/%m/%Y %H:%M:%S")} (horário de Brasília)')
             today = now.date()
             for course in courses:
                 assignments = self.moodle_client.get_assignments(course['id'])
@@ -93,6 +93,13 @@ class DiscordBot(discord.Client):
                     if not due_dt or due_dt < now:
                         continue
                     key = (course['id'], a['name'], a['due'])
+                    # Mostra no console quanto tempo falta para o prazo
+                    delta = due_dt - now
+                    dias = delta.days
+                    horas, resto = divmod(delta.seconds, 3600)
+                    minutos = resto // 60
+                    print(f'[DiscordBot] {course["name"]} - {a["name"]}: falta {dias}d {horas}h {minutos}m para o prazo ({a["due"]})')
+                    tempo_falta_str = f"Faltam {dias}d {horas}h {minutos}m para o prazo."
                     # Nova atividade (após primeira execução)
                     if key not in self.checked_assignments:
                         msg = (
@@ -100,22 +107,24 @@ class DiscordBot(discord.Client):
                             f'🚨 **Nova tarefa lançada!**\n'
                             f'Curso: **{course["name"]}**\n'
                             f'Atividade: **{a["name"]}**\n'
-                            f'Prazo: `{a["due"]}`'
+                            f'Prazo: `{a["due"]}`\n'
+                            f'{tempo_falta_str}'
                         )
                         await channel.send(msg)
                         self.checked_assignments.add(key)
                     # Lembretes de 7, 3, 1 dia
                     else:
-                        dias = (due_dt.date() - today).days
-                        if dias in [7, 3, 1]:
+                        dias_para_prazo = (due_dt.date() - today).days
+                        if dias_para_prazo in [7, 3, 1]:
                             msg = (
                                 f'@everyone\n'
-                                f'⏰ **Faltam {dias} dia{"s" if dias > 1 else ""} para o prazo!**\n'
+                                f'⏰ **Faltam {dias_para_prazo} dia{"s" if dias_para_prazo > 1 else ""} para o prazo!**\n'
                                 f'Curso: **{course["name"]}**\n'
                                 f'Atividade: **{a["name"]}**\n'
-                                f'Prazo: `{a["due"]}`'
+                                f'Prazo: `{a["due"]}`\n'
+                                f'{tempo_falta_str}'
                             )
                             await channel.send(msg)
-            print('Verificação de tarefas concluída.')
+            print('[DiscordBot] Verificação de tarefas concluída.')
         except Exception as e:
             print(f'[DiscordBot] Erro ao checar prazos: {e}')
