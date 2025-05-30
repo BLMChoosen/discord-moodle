@@ -69,7 +69,7 @@ class DiscordBot(discord.Client):
                 await asyncio.sleep(2)
         print('[DiscordBot] Atividades pendentes enviadas!')
 
-    @tasks.loop(minutes=20)
+    @tasks.loop(minutes=5)
     async def check_assignments(self):
         if not self.logged_in or not self.first_run_done:
             print('[DiscordBot] Não logado no Moodle ou primeira execução não concluída, pulando verificação...')
