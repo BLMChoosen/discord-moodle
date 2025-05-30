@@ -37,9 +37,9 @@ python main.py
 
 ## Avisos importantes
 
-* Login automático pode ser bloqueado pelo Moodle ou pela escola.
+* Login automático pode ser bloqueado pelo IFRS.
 * A estrutura do HTML do Moodle pode mudar, o que pode quebrar o parsing das atividades.
-* Use com responsabilidade e respeite as regras da sua instituição.
+* Use com responsabilidade e respeite as regras da instituição.
 
 ---
 
