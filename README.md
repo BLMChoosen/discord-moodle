@@ -23,7 +23,7 @@ Esse é um bot do Discord que faz login automático no Moodle do IFRS Campus Far
 ```
 pip install -r requirements.txt
 ```
-2. Configure o .env com seu usuário, senha e URL do Moodle, além do ID do curso que você quer monitorar.
+2. Configure o .env com seu usuário, senha e token do bot do discord.
 
 3. Configure o token do bot do Discord e o canal onde ele deve mandar as mensagens.
 
