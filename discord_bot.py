@@ -14,7 +14,7 @@ class DiscordBot(discord.Client):
         self.channel_id = channel_id
         self.message_ai = message_ai
         self.checked_assignments = set()
-        self.sent_reminders = set()  # (course_id, assignment_name, due, dias_para_prazo)
+        self.sent_reminders = set()  # (assignment_url, dias_para_prazo)
         self.logged_in = False  # Adicionado para controlar estado de login
         self.first_run_done = False
 
@@ -60,10 +60,10 @@ class DiscordBot(discord.Client):
             msg_lines = []
             for a in assignments:
                 due_dt = utils.parse_moodle_date(a['due'])
-                # Só mostra se o prazo ainda não passou (>= agora)
                 if due_dt and due_dt >= now:
-                    msg_lines.append(f'**{a["name"]}**\nVencimento: `{a["due"]}`')
-                    self.checked_assignments.add((course['id'], a['name'], a['due']))
+                    self.checked_assignments.add(a['url'])
+                    # Usa sempre o nome já tratado do client
+                    msg_lines.append(f'**{a["name"]}**\nVencimento: `{a["due"]}`\n[Ver tarefa]({a["url"]})')
             if msg_lines:
                 msg = f'**Curso:** {course["name"]}\n' + '\n\n'.join(msg_lines)
                 await channel.send(msg)
@@ -92,7 +92,9 @@ class DiscordBot(discord.Client):
                     due_dt = utils.parse_moodle_date(a['due'])
                     if not due_dt or due_dt < now:
                         continue
-                    key = (course['id'], a['name'], a['due'])
+                    key = a['url']
+                    # Corrige o link da tarefa: se a['url'] for None, não mostra o link
+                    link_md = f'[Ver tarefa]({a["url"]})' if a["url"] else ''
                     delta = due_dt - now
                     dias = delta.days
                     horas, resto = divmod(delta.seconds, 3600)
@@ -107,24 +109,42 @@ class DiscordBot(discord.Client):
                             f'Curso: **{course["name"]}**\n'
                             f'Atividade: **{a["name"]}**\n'
                             f'Prazo: `{a["due"]}`\n'
+                            f'{link_md}\n'
                             f'{tempo_falta_str}'
                         )
                         await channel.send(msg)
                         self.checked_assignments.add(key)
-                    # Lembretes de 7, 3, 1 dia (apenas uma vez por dia/atividade)
+                    # Lembretes: 3 dias, 1 dia, ou 6 horas ou menos para o prazo (apenas uma vez por dia/atividade)
                     dias_para_prazo = (due_dt.date() - today).days
-                    reminder_key = (course['id'], a['name'], a['due'], dias_para_prazo)
-                    if dias_para_prazo in [7, 3, 1] and reminder_key not in self.sent_reminders:
+                    reminder_key = (a['url'], dias_para_prazo)
+                    lembrete_6h_key = (a['url'], '6h')
+                    lembrete_enviado = False
+                    if dias_para_prazo in [3, 1] and reminder_key not in self.sent_reminders:
                         msg = (
                             f'@everyone\n'
                             f'⏰ **Faltam {dias_para_prazo} dia{"s" if dias_para_prazo > 1 else ""} para o prazo!**\n'
                             f'Curso: **{course["name"]}**\n'
                             f'Atividade: **{a["name"]}**\n'
                             f'Prazo: `{a["due"]}`\n'
+                            f'{link_md}\n'
                             f'{tempo_falta_str}'
                         )
                         await channel.send(msg)
                         self.sent_reminders.add(reminder_key)
+                        lembrete_enviado = True
+                    # Lembrete especial para <= 6 horas
+                    if not lembrete_enviado and delta.total_seconds() <= 6 * 3600 and delta.total_seconds() > 0 and lembrete_6h_key not in self.sent_reminders:
+                        msg = (
+                            f'@everyone\n'
+                            f'⚠️ **Faltam menos de 6 horas para o prazo!**\n'
+                            f'Curso: **{course["name"]}**\n'
+                            f'Atividade: **{a["name"]}**\n'
+                            f'Prazo: `{a["due"]}`\n'
+                            f'{link_md}\n'
+                            f'{tempo_falta_str}'
+                        )
+                        await channel.send(msg)
+                        self.sent_reminders.add(lembrete_6h_key)
             print('[DiscordBot] Verificação de tarefas concluída.')
 
             # Mostra o horário da próxima execução (após o término do loop)
