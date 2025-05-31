@@ -104,8 +104,6 @@ Se tiver dúvidas, dá uma olhada na [documentação oficial do Discord](https:/
 
 ## To-do:
 
-- Implementar verificação mais precisa, apenas de tarefas (assign).
-
 - Adicionar suporte para acompanhamento individual, marcando tarefas como concluídas e com horários de notificação personalizados.
 
 - Adicionar uma instalação mais simples e com menos funcionalidades, com webhooks.
