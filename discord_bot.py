@@ -93,7 +93,6 @@ class DiscordBot(discord.Client):
                     if not due_dt or due_dt < now:
                         continue
                     key = a['url']
-                    # Corrige o link da tarefa: se a['url'] for None, não mostra o link
                     link_md = f'[Ver tarefa]({a["url"]})' if a["url"] else ''
                     delta = due_dt - now
                     dias = delta.days
@@ -101,7 +100,6 @@ class DiscordBot(discord.Client):
                     minutos = resto // 60
                     print(f'[DiscordBot] {course["name"]} - {a["name"]}: falta {dias}d {horas}h {minutos}m para o prazo ({a["due"]})')
                     tempo_falta_str = f"Faltam {dias}d {horas}h {minutos}m para o prazo."
-                    # Nova atividade (após primeira execução)
                     if key not in self.checked_assignments:
                         msg = (
                             f'@everyone\n'
@@ -114,12 +112,12 @@ class DiscordBot(discord.Client):
                         )
                         await channel.send(msg)
                         self.checked_assignments.add(key)
-                    # Lembretes: 3 dias, 1 dia, ou 6 horas ou menos para o prazo (apenas uma vez por dia/atividade)
                     dias_para_prazo = (due_dt.date() - today).days
                     reminder_key = (a['url'], dias_para_prazo)
                     lembrete_6h_key = (a['url'], '6h')
                     lembrete_enviado = False
-                    if dias_para_prazo in [3, 1] and reminder_key not in self.sent_reminders:
+                    # Só envia lembrete de 1 ou 3 dias se faltar mais de 6 horas
+                    if dias_para_prazo in [3, 1] and reminder_key not in self.sent_reminders and delta.total_seconds() > 6 * 3600:
                         msg = (
                             f'@everyone\n'
                             f'⏰ **Faltam {dias_para_prazo} dia{"s" if dias_para_prazo > 1 else ""} para o prazo!**\n'
@@ -132,8 +130,8 @@ class DiscordBot(discord.Client):
                         await channel.send(msg)
                         self.sent_reminders.add(reminder_key)
                         lembrete_enviado = True
-                    # Lembrete especial para <= 6 horas
-                    if not lembrete_enviado and delta.total_seconds() <= 6 * 3600 and delta.total_seconds() > 0 and lembrete_6h_key not in self.sent_reminders:
+                    # Lembrete especial para <= 6 horas (e não negativo)
+                    if delta.total_seconds() <= 6 * 3600 and delta.total_seconds() > 0 and lembrete_6h_key not in self.sent_reminders:
                         msg = (
                             f'@everyone\n'
                             f'⚠️ **Faltam menos de 6 horas para o prazo!**\n'
