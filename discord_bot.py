@@ -98,49 +98,46 @@ class DiscordBot(discord.Client):
                     dias = delta.days
                     horas, resto = divmod(delta.seconds, 3600)
                     minutos = resto // 60
-                    print(f'[DiscordBot] {course["name"]} - {a["name"]}: falta {dias}d {horas}h {minutos}m para o prazo ({a["due"]})')
                     tempo_falta_str = f"Faltam {dias}d {horas}h {minutos}m para o prazo."
+                    # Nova atividade
                     if key not in self.checked_assignments:
-                        msg = (
-                            f'@everyone\n'
-                            f'🚨 **Nova tarefa lançada!**\n'
-                            f'Curso: **{course["name"]}**\n'
-                            f'Atividade: **{a["name"]}**\n'
-                            f'Prazo: `{a["due"]}`\n'
-                            f'{link_md}\n'
-                            f'{tempo_falta_str}'
+                        msg = self.message_ai.generate_assignment_message(
+                            tipo="nova",
+                            curso=course["name"],
+                            atividade=a["name"],
+                            prazo=a["due"],
+                            tempo_falta_str=tempo_falta_str
                         )
+                        msg = f'@everyone\n{msg}\n{link_md}'
                         await channel.send(msg)
                         self.checked_assignments.add(key)
                     dias_para_prazo = (due_dt.date() - today).days
                     reminder_key = (a['url'], dias_para_prazo)
                     lembrete_6h_key = (a['url'], '6h')
                     lembrete_enviado = False
-                    # Só envia lembrete de 1 ou 3 dias se faltar mais de 6 horas
+                    # Lembrete de 1 ou 3 dias (se faltar mais de 6h)
                     if dias_para_prazo in [3, 1] and reminder_key not in self.sent_reminders and delta.total_seconds() > 6 * 3600:
-                        msg = (
-                            f'@everyone\n'
-                            f'⏰ **Faltam {dias_para_prazo} dia{"s" if dias_para_prazo > 1 else ""} para o prazo!**\n'
-                            f'Curso: **{course["name"]}**\n'
-                            f'Atividade: **{a["name"]}**\n'
-                            f'Prazo: `{a["due"]}`\n'
-                            f'{link_md}\n'
-                            f'{tempo_falta_str}'
+                        msg = self.message_ai.generate_assignment_message(
+                            tipo="lembrete",
+                            curso=course["name"],
+                            atividade=a["name"],
+                            prazo=a["due"],
+                            tempo_falta_str=tempo_falta_str
                         )
+                        msg = f'@everyone\n{msg}\n{link_md}'
                         await channel.send(msg)
                         self.sent_reminders.add(reminder_key)
                         lembrete_enviado = True
-                    # Lembrete especial para <= 6 horas (e não negativo)
+                    # Lembrete especial para <= 6 horas
                     if delta.total_seconds() <= 6 * 3600 and delta.total_seconds() > 0 and lembrete_6h_key not in self.sent_reminders:
-                        msg = (
-                            f'@everyone\n'
-                            f'⚠️ **Faltam menos de 6 horas para o prazo!**\n'
-                            f'Curso: **{course["name"]}**\n'
-                            f'Atividade: **{a["name"]}**\n'
-                            f'Prazo: `{a["due"]}`\n'
-                            f'{link_md}\n'
-                            f'{tempo_falta_str}'
+                        msg = self.message_ai.generate_assignment_message(
+                            tipo="6h",
+                            curso=course["name"],
+                            atividade=a["name"],
+                            prazo=a["due"],
+                            tempo_falta_str=tempo_falta_str
                         )
+                        msg = f'@everyone\n{msg}\n{link_md}'
                         await channel.send(msg)
                         self.sent_reminders.add(lembrete_6h_key)
             print('[DiscordBot] Verificação de tarefas concluída.')
